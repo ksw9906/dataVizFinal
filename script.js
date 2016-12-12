@@ -156,6 +156,12 @@ function switchView(){
     pLands.setAttribute("class","filterButton");
     cate.appendChild(pLands);    
     
+    var pSideboard = document.createElement('p');
+    pSideboard.appendChild(document.createTextNode("Sideboard"));
+    pSideboard.setAttribute("id","sideboard");
+    pSideboard.setAttribute("class","filterButton");
+    cate.appendChild(pSideboard);    
+    
     init();
   }
   else{
@@ -242,7 +248,8 @@ function init(){
   document.getElementById("spells").onclick = drawCardChart;
   document.getElementById("artifacts").onclick = drawCardChart;
   document.getElementById("enchantments").onclick = drawCardChart;
-  document.getElementById("lands").onclick = drawCardChart;
+  document.getElementById("lands").onclick = drawCardChart;  
+  document.getElementById("sideboard").onclick = drawCardChart;
   
   document.getElementById("deckOptions").onchange = drawCardChart;
 }
