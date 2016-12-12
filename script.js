@@ -7,7 +7,7 @@ var deck = "B/G Delirium";
 var view = "DeckInfo";
 
 //function to switch views
-function switchView(v){
+function switchView(v,deckID){
   
   //if we are already there see ya
   if(view == v){
@@ -172,7 +172,13 @@ function switchView(v){
     pSideboard.setAttribute("id","sideboard");
     pSideboard.setAttribute("class","filterButton");
     cate.appendChild(pSideboard);    
+    
+    //give the buttons their functionality
     init();
+    
+    //call the deck id now!
+    document.getElementById('deckOptions').value = deckID;
+    drawCardChart();
   }
   else{
     while(cate.hasChildNodes())
@@ -246,8 +252,8 @@ function handleQueryResponse(response){
   var dataArray = [];
   for(var i = 0; i < data.Tf.length;i++){
     var cardName = data.Tf[i].c[0].v;
-    var imgUrl = "assets/" + cardName + ".jpg"
-    dataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)]
+    var imgUrl = "assets/" + cardName + ".jpg";
+    dataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)];
   }
   
   graphData.addRows(dataArray);
@@ -338,11 +344,25 @@ function handleQueryResponseDeck(response){
 				"options": {'title':'Standard Deck Prices',
 												'width':1000,
 												'height':800}
-			});	
-			
+			});      
+    	
 			dashboard.bind(rangeSliderDeck,chartDeck);
 			// Instantiate and draw our chart, passing in some options.
 			
+      //add the select event listener
+      google.visualization.events.addListener(chartDeck,'select',
+          function(){            
+
+            var selectedItem = dashboard.getSelection()[0];
+
+            if (selectedItem) {
+              var deck = graphData.getValue(selectedItem.row,0);
+              
+              switchView("CardInfo",deck);
+            }
+        });
+      
+      
 			dashboard.draw(graphData);
 	  }
 	  
