@@ -10,20 +10,41 @@
 
   <body>
     <div id="nav">
-      <a class="navLink selectedNav" id="DeckInfo" onclick='switchView(this.id);'>Deck Information</a>
-      <a class="navLink" id="CardInfo" onclick="switchView(this.id);">Card Information</a>
+      <a class="navLink selectedNav" id="DeckInfo" href ="#" onclick="switchView();">Deck Information</a>
+      <a class="navLink" id="CardInfo" onclick="switchView();" href="#">Card Information</a>
     </div>
     
-		<div id="deck_div">
-			<div id="dashboard_div">
-				<div id="range_div"></div>
-				<div id="chart_div"></div>
-			</div>
+    <div id="dashboard_div">
+			<div id="range_div"></div>
+			<div id="chart_div"></div>
 		</div>
     
     <div id="decks">
+      <p>Select a Deck:</p>
+      <select id="deckOptions">
+        <option value="B/G Delirium">B/G Delirium</option>
+        <option value="White-Blue Flash">White-Blue Flash</option>
+        <option value="Mardu Vehicles">Mardu Vehicles</option>
+        <option value="RW Vehicles">RW Vehicles</option>
+        <option value="R/B Aggro">R/B Aggro</option>
+        <option value="B/R Zombies">B/R Zombies</option>
+        <option value="Red-Green Aetherworks">Red-Green Aetherworks</option>
+        <option value="G/R Energy">G/R Energy</option>
+        <option value="Jeskai Control">Jeskai Control</option>
+        <option value="RG Energy">RG Energy</option>
+        <option value="Bant Aggro">Bant Aggro</option>
+        <option value="Jeskai Dynavolt">Jeskai Dynavolt</option>        
+      </select>
     </div>
     <div id="categories">
+      <p>Select a Card Category:</p>
+      <p id="creatures" class="filterButton selected">Creatures</p>
+      <p id="planeswalkers" class="filterButton">Planeswalkers</p>
+      <p id="spells" class="filterButton">Spells</p>
+      <p id="artifacts" class="filterButton">Artifacts</p>
+      <p id="enchantments" class="filterButton">Enchantments</p>
+      <p id="lands" class="filterButton">Lands</p>
+      <p id="sideboard" class="filterButton">Sideboard</p>
     </div>
     <div id="cardChart"></div>
   </body>

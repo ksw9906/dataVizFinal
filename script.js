@@ -1,34 +1,23 @@
-google.charts.load('current', {'packages':['corechart','controls']});
-
-google.charts.setOnLoadCallback(drawChart);
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawCardChart);
+		google.charts.setOnLoadCallback(drawChart);
 
 var category = "Creatures";
 var deck = "B/G Delirium";
-var view = "DeckInfo";
+var view = "Deck";
 
 //function to switch views
-function switchView(v){
-  
-  //if we are already there see ya
-  if(view == v){
-    return;
-  }  
-  view = v;
+function switchView(){
   
   //get the divs and the stuff in them
   var cardInfo = document.getElementById('decks');
   var cate = document.getElementById('categories');
-  var cardChart = document.getElementById('cardChart');
-  var deckInfo = document.getElementById('deck_div');
+  var deckInfo = document.getElementById('dashboard_div');
 
   //check if it is is original view
-  if(view=="CardInfo"){
+  if(view=="Deck"){
     //clear the deck info
-    
-    while(deckInfo.hasChildNodes())
-    {
-      deckInfo.removeChild(deckInfo.firstChild);
-    }  
+    deckInfo.html('');
     
     //append the text
     var p = document.createElement('p');
@@ -151,13 +140,13 @@ function switchView(v){
 
     var pArtifacts = document.createElement('p');
     pArtifacts.appendChild(document.createTextNode("Artifacts"));
-    pArtifacts.setAttribute("id","artifacts");
+    pArtifacts.setAttribute("id","Artifacts");
     pArtifacts.setAttribute("class","filterButton");
     cate.appendChild(pArtifacts);
 
     var pEnchantments = document.createElement('p');
     pEnchantments.appendChild(document.createTextNode("Enchantments"));
-    pEnchantments.setAttribute("id","enchantments");
+    pEnchantments.setAttribute("id","Enchantments");
     pEnchantments.setAttribute("class","filterButton");
     cate.appendChild(pEnchantments);    
 
@@ -165,48 +154,26 @@ function switchView(v){
     pLands.appendChild(document.createTextNode("Lands"));
     pLands.setAttribute("id","lands");
     pLands.setAttribute("class","filterButton");
-    cate.appendChild(pLands);        
+    cate.appendChild(pLands);    
+    
+    var pSideboard = document.createElement('p');
+    pSideboard.appendChild(document.createTextNode("Sideboard"));
+    pSideboard.setAttribute("id","sideboard");
+    pSideboard.setAttribute("class","filterButton");
+    cate.appendChild(pSideboard);    
+    
     init();
   }
   else{
-    while(cate.hasChildNodes())
-    {
-      cate.removeChild(cate.firstChild);
-    }
     
-    while(cardInfo.hasChildNodes())
-    {
-      cardInfo.removeChild(cardInfo.firstChild);
-    }   
-    
-    while(cardChart.hasChildNodes())
-    {
-      cardChart.removeChild(cardChart.firstChild);
-    }  
-    
-    var dashDiv = document.createElement('div');
-    dashDiv.setAttribute('id','dashboard_div');
-    
-    //make the two divs
-    var rDiv = document.createElement('div');
-    rDiv.setAttribute("id","range_div");
-    dashDiv.appendChild(rDiv);
-    
-    var cDiv = document.createElement('div');
-    cDiv.setAttribute("id","chart_div");
-    dashDiv.appendChild(cDiv);
-    
-    deckInfo.appendChild(dashDiv);
-    
-    drawChart();
   }
+  
+  
 }
 
 //Bar Chart
 function drawCardChart(e) {  
-  if(e){
-    console.log(e.classList);
-    
+  if(e){    
     if (e.target.classList.contains("filterButton")){
       category = e.target.innerHTML;
     
@@ -222,18 +189,32 @@ function drawCardChart(e) {
   }
 
   var query = new google.visualization.Query("https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/gviz/tq?usp=sharing&gid=0");
-  var queryString = "select A, F where D = " + "'" + category + "'" + "and B = " + "'" + deck + "'";
+  var queryString = "select A, E, F where D = " + "'" + category + "'" + "and B = " + "'" + deck + "'";
   query.setQuery(queryString);
-  query.send(handleQueryResponse);
+  query.send(handleQueryResponseDeck);
 }
 
-function handleQueryResponse(response){
+function handleQueryResponseDeck(response){
   if(response.isError()) {
     console.log('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
     return;
   }        
   var data = response.getDataTable();
-
+  
+  var graphData = new google.visualization.DataTable();
+  graphData.addColumn('string','Card');
+  graphData.addColumn('number','Price');
+  graphData.addColumn({'type':'string', 'role': 'tooltip', 'p':{'html':true}});
+         
+  var dataArray = [];
+  for(var i = 0; i < data.Tf.length;i++){
+    var cardName = data.Tf[i].c[0].v;
+    var imgUrl = "assets/" + cardName + ".jpg"
+    dataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)]
+  }
+  
+  graphData.addRows(dataArray);
+  
   var options = {title: deck + ' Card Prices',
                  width:700,
                  height:500,
@@ -243,10 +224,22 @@ function handleQueryResponse(response){
                  },
                  vAxis: {
                    title: 'Price'
-                 }};
+                 },
+                 tooltip: {isHtml: true}
+                };
 
   var chart = new google.visualization.ColumnChart(document.getElementById('cardChart'));
-  chart.draw(data, options);
+  chart.draw(graphData, options);
+}
+
+function createCustomHTMLContent(url,cardName,singlePrice,amount){
+  var price = singlePrice.toFixed(2);
+  return '<div style="padding:5px;font-family:sans-serif;font-size:14px">' +
+    '<p style="margin:0;">' + cardName + '</p><br/>' +
+    '<img src="' + url + '" style = "width: 150px;height:209px;"><br/>' +
+    '<p style="margin:0;">Price: $' + price + '</p><br/>' + 
+    '<p style="margin:0;">Amount in Deck: ' + amount + '</p><br/></div>';
+  
 }
 
 function init(){
@@ -255,12 +248,13 @@ function init(){
   document.getElementById("spells").onclick = drawCardChart;
   document.getElementById("artifacts").onclick = drawCardChart;
   document.getElementById("enchantments").onclick = drawCardChart;
-  document.getElementById("lands").onclick = drawCardChart;
+  document.getElementById("lands").onclick = drawCardChart;  
+  document.getElementById("sideboard").onclick = drawCardChart;
   
   document.getElementById("deckOptions").onchange = drawCardChart;
 }
 
-function handleQueryResponseDeck(response){
+function handleQueryResponse(response){
 		
 		 if (response.isError()) {
 			alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
@@ -268,6 +262,8 @@ function handleQueryResponseDeck(response){
 		}
 
 		var data = response.getDataTable();
+		
+		console.log(data);
 		//var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
 		//chart.draw(data, {width: 800, height: 400, is3D: true});
 		
@@ -293,7 +289,7 @@ function handleQueryResponseDeck(response){
 				document.getElementById('dashboard_div'));
 	
 			// Create a range slider, passing some options
-			var rangeSliderDeck = new google.visualization.ControlWrapper({
+			var rangeSlider = new google.visualization.ControlWrapper({
 				'controlType': 'NumberRangeFilter',
 				'containerId': 'range_div',
 				'options': {
@@ -302,7 +298,7 @@ function handleQueryResponseDeck(response){
 			});
 			
 			
-			var chartDeck = new google.visualization.ChartWrapper({
+			var chart = new google.visualization.ChartWrapper({
 				"chartType":"ColumnChart",
 				"containerId":"chart_div",
 				"options": {'title':'Standard Deck Prices',
@@ -310,17 +306,19 @@ function handleQueryResponseDeck(response){
 												'height':800}
 			});	
 			
-			dashboard.bind(rangeSliderDeck,chartDeck);
+			dashboard.bind(rangeSlider,chart);
 			// Instantiate and draw our chart, passing in some options.
 			
 			dashboard.draw(graphData);
 	  }
 	  
-function drawChart() {
+	function drawChart() {
 		
 		var url = "https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/edit?usp=sharing&sheet=DeckPrices";
 		
 		var query = new google.visualization.Query(url);
 		
-		query.send(handleQueryResponseDeck);
+		query.send(handleQueryResponse);
 	}
+
+window.onload = init;
