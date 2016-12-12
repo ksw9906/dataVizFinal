@@ -1,0 +1,61 @@
+.filterButton{
+  display:inline;
+  margin:5px;
+  padding:5px;
+  border-radius:5px;
+  background-color:rgba(51, 102, 204, 0.46);
+}
+
+.filterButton:hover{
+  box-shadow: 0px 0px 5px 1px grey;
+}
+
+.selected{
+  background-color: #5a91d7;
+  box-shadow: 0px 0px 5px 1px grey;
+}
+
+#cardChart{
+  position:relative;
+  top:20px;
+  left:-30px;
+}
+
+#categories, #decks{
+  position:relative;
+  font-family: sans-serif;
+}
+
+.navLink {
+  display:inline;
+  margin-right:5px;
+  padding:5px;
+  border-radius:5px;
+  background-color:rgb(50,50,50);
+  color:white;
+  text-decoration:none;
+}
+
+.selectedNav{
+  box-shadow: 0px 0px 5px 1px grey;
+}
+
+#nav {
+  font-family:sans-serif;
+  position: relative;
+  top: 10px;
+  padding-bottom: 10px;
+}
+
+.navLink:hover{
+  box-shadow: 0px 0px 5px 1px grey;
+}
+
+hr {
+  border: solid 1px grey
+}
+
+#dashboard_div{
+  position: relative;
+  top: 40px;
+}
