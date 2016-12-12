@@ -185,7 +185,7 @@ function drawCardChart(e) {
   }
 
   var query = new google.visualization.Query("https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/gviz/tq?usp=sharing&gid=0");
-  var queryString = "select A, F where D = " + "'" + category + "'" + "and B = " + "'" + deck + "'";
+  var queryString = "select A, E, F where D = " + "'" + category + "'" + "and B = " + "'" + deck + "'";
   query.setQuery(queryString);
   query.send(handleQueryResponseDeck);
 }
@@ -196,7 +196,21 @@ function handleQueryResponseDeck(response){
     return;
   }        
   var data = response.getDataTable();
-
+  
+  var graphData = new google.visualization.DataTable();
+  graphData.addColumn('string','Card');
+  graphData.addColumn('number','Price');
+  graphData.addColumn({'type':'string', 'role': 'tooltip', 'p':{'html':true}});
+         
+  var dataArray = [];
+  for(var i = 0; i < data.Tf.length;i++){
+    var cardName = data.Tf[i].c[0].v;
+    var imgUrl = "assets/" + cardName + ".jpg"
+    dataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)]
+  }
+  
+  graphData.addRows(dataArray);
+  
   var options = {title: deck + ' Card Prices',
                  width:700,
                  height:500,
@@ -206,10 +220,22 @@ function handleQueryResponseDeck(response){
                  },
                  vAxis: {
                    title: 'Price'
-                 }};
+                 },
+                 tooltip: {isHtml: true}
+                };
 
   var chart = new google.visualization.ColumnChart(document.getElementById('cardChart'));
-  chart.draw(data, options);
+  chart.draw(graphData, options);
+}
+
+function createCustomHTMLContent(url,cardName,singlePrice,amount){
+  var price = singlePrice.toFixed(2);
+  return '<div style="padding:5px;font-family:sans-serif;font-size:14px">' +
+    '<p style="margin:0;">' + cardName + '</p><br/>' +
+    '<img src="' + url + '" style = "width: 150px;height:209px;"><br/>' +
+    '<p style="margin:0;">Price: $' + price + '</p><br/>' + 
+    '<p style="margin:0;">Amount in Deck: ' + amount + '</p><br/></div>';
+  
 }
 
 function init(){
