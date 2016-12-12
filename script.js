@@ -1,6 +1,6 @@
 google.charts.load('current', {'packages':['corechart','controls']});
 
-google.charts.setOnLoadCallback(drawChart);
+google.charts.setOnLoadCallback(getGraphData);
 
 var category = "Creatures";
 var deck = "B/G Delirium";
@@ -19,6 +19,8 @@ function switchView(v,deckID){
   var cardInfo = document.getElementById('decks');
   var cate = document.getElementById('categories');
   var cardChart = document.getElementById('cardChart');
+  var pieChart = document.getElementById('pieChart');
+  var cardCharts = document.getElementById('cardCharts');
   var deckInfo = document.getElementById('deck_div');
 
   //check if it is is original view
@@ -196,6 +198,11 @@ function switchView(v,deckID){
       cardChart.removeChild(cardChart.firstChild);
     }  
     
+    while(pieChart.hasChildNodes())
+    {
+      pieChart.removeChild(pieChart.firstChild);
+    }  
+    
     var dashDiv = document.createElement('div');
     dashDiv.setAttribute('id','dashboard_div');
     
@@ -208,9 +215,14 @@ function switchView(v,deckID){
     cDiv.setAttribute("id","chart_div");
     dashDiv.appendChild(cDiv);
     
+    var hDiv = document.createElement('div');
+    hDiv.style.display = "none";
+    hDiv.setAttribute("id","hidden_div");
+    dashDiv.appendChild(hDiv);
+    
     deckInfo.appendChild(dashDiv);
     
-    drawChart();
+    getGraphData();
   }
 }
 
@@ -235,6 +247,11 @@ function drawCardChart(e) {
   var queryString = "select A, E, F where D = " + "'" + category + "'" + "and B = " + "'" + deck + "'";
   query.setQuery(queryString);
   query.send(handleQueryResponse);
+  
+  var pieQuery = new google.visualization.Query("https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/gviz/tq?usp=sharing&gid=27391810");
+  var queryString = "select A, B, C, D, E, F, G where A= " + "'" + deck + "'";
+  pieQuery.setQuery(queryString);
+  pieQuery.send(handleQueryResponsePieChart);
 }
 
 function handleQueryResponse(response){
@@ -249,14 +266,14 @@ function handleQueryResponse(response){
   graphData.addColumn('number','Price');
   graphData.addColumn({'type':'string', 'role': 'tooltip', 'p':{'html':true}});
          
-  var dataArray = [];
+  var cardDataArray = [];
   for(var i = 0; i < data.Tf.length;i++){
     var cardName = data.Tf[i].c[0].v;
     var imgUrl = "assets/" + cardName + ".jpg";
-    dataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)];
+    cardDataArray[i] = [cardName,data.Tf[i].c[2].v,createCustomHTMLContent(imgUrl,cardName,data.Tf[i].c[2].v,data.Tf[i].c[1].v)];
   }
   
-  graphData.addRows(dataArray);
+  graphData.addRows(cardDataArray);
   
   var options = {title: deck + ' Card Prices',
                  width:700,
@@ -284,6 +301,31 @@ function createCustomHTMLContent(url,cardName,singlePrice,amount){
     '<p style="margin:0;">Amount in Deck: ' + amount + '</p><br/></div>';
 }
 
+function handleQueryResponsePieChart(response){
+  var data = response.getDataTable();
+  
+  var graphData = new google.visualization.DataTable();
+  graphData.addColumn('string','category');
+  graphData.addColumn('number','percent');  
+  
+  var pieDataArray = [];
+  for(var i = 0; i < data.Tf[0].c.length-1;i++){
+    var category = data.Sf[i+1].label;
+    var percent = parseInt(data.Tf[0].c[i+1].f);
+    pieDataArray[i] = [category,percent];
+  }
+  
+  graphData.addRows(pieDataArray);
+  
+  var options = {title: deck + ' Card Breakdown',
+                 width:700,
+                 height:500
+                };
+  
+  var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
+  chart.draw(graphData, options);
+}
+
 function init(){
   document.getElementById("creatures").onclick = drawCardChart;
   document.getElementById("planeswalkers").onclick = drawCardChart;
@@ -296,6 +338,8 @@ function init(){
   document.getElementById("deckOptions").onchange = drawCardChart;
 }
 
+var dataArray;
+
 function handleQueryResponseDeck(response){
 		
 		 if (response.isError()) {
@@ -306,71 +350,128 @@ function handleQueryResponseDeck(response){
 		var data = response.getDataTable();
 		//var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
 		//chart.draw(data, {width: 800, height: 400, is3D: true});
-		
-			//Create the data table.
-		var graphData = new google.visualization.arrayToDataTable([
-			[data.Sf[0].label,data.Sf[1].label, {role: 'style'}],
-			[data.Tf[0].c[0].v, data.Tf[0].c[1].v, 'black'],
-			[data.Tf[1].c[0].v, data.Tf[1].c[1].v, 'blue'],
-			[data.Tf[2].c[0].v, data.Tf[2].c[1].v, 'red'],
-			[data.Tf[3].c[0].v, data.Tf[3].c[1].v, 'red'],
-			[data.Tf[4].c[0].v, data.Tf[4].c[1].v, 'black'],
-			[data.Tf[5].c[0].v, data.Tf[5].c[1].v, 'black'],
-			[data.Tf[6].c[0].v, data.Tf[6].c[1].v, 'green'],
-			[data.Tf[7].c[0].v, data.Tf[7].c[1].v, 'blue'],
-			[data.Tf[8].c[0].v, data.Tf[8].c[1].v, 'green'],
-			[data.Tf[9].c[0].v, data.Tf[9].c[1].v, 'blue'],
-			[data.Tf[10].c[0].v, data.Tf[10].c[1].v, 'black'],
-			[data.Tf[11].c[0].v, data.Tf[11].c[1].v, 'black']
-	  ]);
-	
-			//Create a dashboard.
-			var dashboard = new google.visualization.Dashboard(
-				document.getElementById('dashboard_div'));
-	
-			// Create a range slider, passing some options
-			var rangeSliderDeck = new google.visualization.ControlWrapper({
-				'controlType': 'NumberRangeFilter',
-				'containerId': 'range_div',
-				'options': {
-					'filterColumnLabel': 'Total Deck Price'
-				}
-			});
-			
-			
-			var chartDeck = new google.visualization.ChartWrapper({
-				"chartType":"ColumnChart",
-				"containerId":"chart_div",
-				"options": {'title':'Standard Deck Prices',
-												'width':1000,
-												'height':800}
-			});      
-    	
-			dashboard.bind(rangeSliderDeck,chartDeck);
-			// Instantiate and draw our chart, passing in some options.
-			
-      //add the select event listener
-      google.visualization.events.addListener(chartDeck,'select',
-          function(){            
 
-            var selectedItem = dashboard.getSelection()[0];
+        dataArray = [];
+        for(var i = 0; i < data.Tf.length;i++){
+          dataArray[i] = [data.Tf[i].c[0].v,data.Tf[i].c[1].v];
+        }
+  
+        drawTooltipChart();
+}
 
-            if (selectedItem) {
-              var deck = graphData.getValue(selectedItem.row,0);
-              
-              switchView("CardInfo",deck);
-            }
-        });
-      
-      
-			dashboard.draw(graphData);
-	  }
+function drawChart(){
+  
+  var graphData = new google.visualization.DataTable();
+  graphData.addColumn('string', 'Deck');        
+  graphData.addColumn('number', 'Total Deck Price');
+  graphData.addColumn({
+    type:'string',
+    label: 'Tooltip Chart',
+    role: 'tooltip',
+    'p': {'html':true}
+  });
+
+  graphData.addRows(dataArray);
+  
+  //Create a dashboard.
+  var dashboard = new google.visualization.Dashboard(
+      document.getElementById('dashboard_div'));
+
+  // Create a range slider, passing some options
+  var rangeSliderDeck = new google.visualization.ControlWrapper({
+      'controlType': 'NumberRangeFilter',
+      'containerId': 'range_div',
+      'options': {
+          'filterColumnLabel': 'Total Deck Price'
+      }
+  });
+
+
+  var chartDeck = new google.visualization.ChartWrapper({
+      "chartType":"ColumnChart",
+      "containerId":"chart_div",
+      "options": {'title':'Standard Deck Prices',
+                  'width':1000,
+                  'height':800,
+                  'tooltip': {isHtml:true}
+                 }
+  });      
+
+  dashboard.bind(rangeSliderDeck,chartDeck);
+  // Instantiate and draw our chart, passing in some options.
+
+  //add the select event listener
+  google.visualization.events.addListener(chartDeck,'select',
+  function(){            
+
+    var selectedItem = dashboard.getSelection()[0];
+
+    if (selectedItem) {
+      var deck = graphData.getValue(selectedItem.row,0);
+
+      switchView("CardInfo",deck);
+    }
+  });
+
+  dashboard.draw(graphData);
+}
+
 	  
-function drawChart() {
-		
-		var url = "https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/edit?usp=sharing&sheet=DeckPrices";
-		
-		var query = new google.visualization.Query(url);
-		
-		query.send(handleQueryResponseDeck);
-	}
+function getGraphData() {		
+  var url = "https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/edit?usp=sharing&sheet=DeckPrices";
+
+  var query = new google.visualization.Query(url);
+
+  query.send(handleQueryResponseDeck);
+}
+
+function drawTooltipChart(){
+  var query = new google.visualization.Query("https://docs.google.com/spreadsheets/d/1pKY5tvh7YFk18kpQPhaKxJtcKl11U0KpAR1Dz-XXj_0/gviz/tq?usp=sharing&gid=1197097986");
+  query.send(handleQueryResponseTooltip);
+}
+
+function handleQueryResponseTooltip(response){
+  var tooltipData = response.getDataTable();
+  var tooltipOptions = {
+    title:'Deck Composition',
+    legend: {position: 'labeled', textStyle: 'black'},
+    pieSliceText: 'none'    
+  }
+  
+  var view = new google.visualization.DataView(tooltipData);
+  
+  for(var i = 0; i < 12; i++){
+    view.setColumns([0,i+1]);
+    
+    var hiddenDiv = document.getElementById('hidden_div');  
+    var tooltipChart = new google.visualization.PieChart(hiddenDiv);
+    
+    google.visualization.events.addListener(tooltipChart, 'ready', function(){
+      var tooltipImg = '<img src="' + tooltipChart.getImageURI() + '">';
+      dataArray[i][2] = tooltipImg;
+    });
+    
+    tooltipChart.draw(view,tooltipOptions);
+  }
+  drawChart();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

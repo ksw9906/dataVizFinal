@@ -19,6 +19,8 @@
   position:relative;
   top:20px;
   left:-30px;
+  width:50%;
+  float: left;
 }
 
 #categories, #decks{
@@ -58,4 +60,15 @@ hr {
 #dashboard_div{
   position: relative;
   top: 40px;
+}
+
+#pieChart{
+  position: relative;
+  left: 600px;
+  top: 30px;
+  width: 50%;
+}
+
+#cardCharts{
+  width: 1100px;
 }
