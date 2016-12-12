@@ -167,9 +167,7 @@ function switchView(){
 
 //Bar Chart
 function drawCardChart(e) {  
-  if(e){
-    console.log(e.classList);
-    
+  if(e){    
     if (e.target.classList.contains("filterButton")){
       category = e.target.innerHTML;
     
