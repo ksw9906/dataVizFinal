@@ -8,12 +8,7 @@
     <link rel="stylesheet" type="text/css" href="styles.css"/>
   </head>
 
-  <body>
-    <div id="nav">
-      <a class="navLink selectedNav" id="DeckInfo" onclick='switchView(this.id);'>Deck Information</a>
-      <a class="navLink" id="CardInfo" onclick="switchView(this.id);">Card Information</a>
-    </div>
-    
+  <body>    
     <div id="deck_div">
         <div id="dashboard_div">
             <div id="range_div"></div>
@@ -29,6 +24,10 @@
     <div id="cardCharts">
       <div id="cardChart"></div>
       <div id="pieChart"></div>
+    </div>
+    
+    <div id="nav">
+      <a class="navLink selectedNav" id="DeckInfo" onclick='switchView(this.id);' style="display:none; text-align:center">Back</a>
     </div>
   </body>
 </html>

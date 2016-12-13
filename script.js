@@ -25,6 +25,9 @@ function switchView(v,deckID){
 
   //check if it is is original view
   if(view=="CardInfo"){
+    //make back button visible
+    document.getElementById("DeckInfo").style.display = "block";
+    
     //clear the deck info
     
     while(deckInfo.hasChildNodes())
@@ -223,6 +226,9 @@ function switchView(v,deckID){
     deckInfo.appendChild(dashDiv);
     
     getGraphData();
+    
+    //make back button visible
+    document.getElementById("DeckInfo").style.display = "none";
   }
 }
 

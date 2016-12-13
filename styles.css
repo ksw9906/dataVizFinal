@@ -21,6 +21,7 @@
   left:-30px;
   width:50%;
   float: left;
+  z-index: 1;
 }
 
 #categories, #decks{
@@ -45,8 +46,9 @@
 #nav {
   font-family:sans-serif;
   position: relative;
-  top: 10px;
+  top: 30px;
   padding-bottom: 10px;
+  width: 100px;
 }
 
 .navLink:hover{
@@ -67,6 +69,7 @@ hr {
   left: 600px;
   top: 30px;
   width: 50%;
+  z-index: 0;
 }
 
 #cardCharts{
